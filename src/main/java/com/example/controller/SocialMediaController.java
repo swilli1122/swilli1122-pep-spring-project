@@ -69,7 +69,7 @@ public class SocialMediaController {
 
     @GetMapping("/messages/{messageId}")
     public ResponseEntity<Message> getMessageById(@PathVariable int messageId) {
-        Message message = messageService.getMessageById(messageId)
+        Message message = messageService.getMessageById(messageId);
         return ResponseEntity.status(200).body(message);
     }
 
@@ -80,8 +80,8 @@ public class SocialMediaController {
     }
 
     @PatchMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> updateMessageById(@RequestBody Message message) {
-        int rowsUpdated = messageService.updateMessageById(message);
+    public ResponseEntity<Integer> updateMessageById(@RequestBody int messageId) {
+        int rowsUpdated = messageService.updateMessageById(messageId);
         if (rowsUpdated == 1) {
             return ResponseEntity.status(200).body(rowsUpdated);
         } else {
