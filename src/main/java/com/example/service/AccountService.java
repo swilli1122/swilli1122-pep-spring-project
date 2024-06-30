@@ -28,4 +28,14 @@ public class AccountService {
         return accountRepository.findByUsernameAndPassword(account.getUsername(), account.getPassword());
     }
 
+    // added method to check if an account already exists by given username, will return a null Account if not
+    public Account accountExistsByUsername(String username) {
+        return accountRepository.findByUsername(username);
+    }
+
+    // added method to check if account already exists by given accountId
+    public Account accountExistsById(int accountId) {
+        return accountRepository.findByAccountId(accountId);
+    }
+
 }

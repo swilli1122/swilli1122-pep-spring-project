@@ -32,21 +32,30 @@ public class SocialMediaController {
 
     @PostMapping("/register")
     public ResponseEntity<Account> newAccount(@RequestBody Account account) {
+        // check if account already exists
+        if (accountService.accountExistsByUsername(account.getUsername()) != null) {
+            return ResponseEntity.status(409).body(account);
+        }
+        // save the account to data
         Account newAccount = accountService.newAccount(account);
-        // add getAccountByUsername check here
         if (newAccount != null) {
+            // successful save
             return ResponseEntity.status(200).body(newAccount);
         } else {
+            //something went wrong
             return ResponseEntity.status(401).body(newAccount);
         }
     }
 
     @PostMapping("/login")
     public ResponseEntity<Account> login(@RequestBody Account account) {
+        // creates an Account with username and password to check
         Account loginAccount = accountService.login(account);
         if (loginAccount != null) {
+            // found an Account with matching username and password
             return ResponseEntity.status(200).body(loginAccount);
         } else {
+            // no Account found
             return ResponseEntity.status(401).body(loginAccount);
         }
         
@@ -54,10 +63,17 @@ public class SocialMediaController {
 
     @PostMapping("/messages")
     public ResponseEntity<Message> postMessage(@RequestBody Message message) {
+        // check if the account trying to post message exists 
+        if (accountService.accountExistsById(message.getPostedBy()) == null) {
+            return ResponseEntity.status(400).body(message);
+        }
+        // creates the message and saves in db
         Message newMessage = messageService.postMessage(message);
         if (newMessage != null) {
+            // new message successfully saved
             return ResponseEntity.status(200).body(newMessage);
         } else {
+            // error in message content
             return ResponseEntity.status(400).body(newMessage);
         }
     }
@@ -75,22 +91,31 @@ public class SocialMediaController {
 
     @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Integer> deleteMessageById(@PathVariable int messageId) {
-        int rowsUpdated = messageService.deleteMessageById(messageId);
-        return ResponseEntity.status(200).body(rowsUpdated);
+        Message targetMessage = messageService.deleteMessageById(messageId);
+        if (targetMessage != null) {
+            // target message found and successfully deleted
+            return ResponseEntity.status(200).body(1);
+        } else {
+            // target message was not found
+            return ResponseEntity.status(200).body(null);
+        }
     }
 
     @PatchMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> updateMessageById(@RequestBody int messageId) {
-        int rowsUpdated = messageService.updateMessageById(messageId);
-        if (rowsUpdated == 1) {
-            return ResponseEntity.status(200).body(rowsUpdated);
+    public ResponseEntity<Integer> updateMessageById(@PathVariable int messageId, @RequestBody Message message) {
+        // passes target of message update and update information
+        Message targetMessage = messageService.updateMessageById(messageId, message);
+        if (targetMessage != null) {
+            // target message successfully updated
+            return ResponseEntity.status(200).body(1);
         } else {
-            return ResponseEntity.status(400).body(rowsUpdated);
+            // target message not found OR invalid message text 
+            return ResponseEntity.status(400).body(null);
         }
     }
 
     @GetMapping("/accounts/{accountId}/messages")
-    public List<Message> getAllMessagesByAccountId(int accountId) {
+    public List<Message> getAllMessagesByAccountId(@PathVariable int accountId) {
         return messageService.getAllMessagesByAccountId(accountId);
     }
 

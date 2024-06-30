@@ -21,8 +21,11 @@ public class MessageService {
     }
 
     public Message postMessage(Message message) {
-        Message newMessage = messageRepository.save(message);
-        return newMessage;
+        // check for desired params of messageText
+        if (message.getMessageText() != "" && message.getMessageText().length() <= 255) {
+            Message newMessage = messageRepository.save(message);
+            return newMessage;
+        } else return null;
     }
 
     public List<Message> getAllMessages() {
@@ -30,22 +33,32 @@ public class MessageService {
     }
 
     public Message getMessageById(int messageId) {
-        return messageRepository.findById(messageId).orElseThrow();
+        // gets message or if not found returns null
+        return messageRepository.findById(messageId).orElse(null);
     }
 
-    public int deleteMessageById(int messageId) {
-        messageRepository.deleteById(messageId);
-        return 0;
+    public Message deleteMessageById(int messageId) {
+        Message targetMessage = getMessageById(messageId);
+        if (targetMessage != null) {
+            messageRepository.deleteById(messageId);
+        }
+        return targetMessage;
     }
 
-    public int updateMessageById(int messageId) {
-        Message message = messageRepository.findById(messageId).orElseThrow();
-        messageRepository.save(message);
-        return 0;
+    public Message updateMessageById(int messageId, Message message) {
+        // first check if desired message to update exists
+        Message targetMessage = getMessageById(messageId);
+        if (targetMessage != null) {
+            if (message.getMessageText() != "" && message.getMessageText().length() <= 255) {
+                messageRepository.save(message);
+            } else return null;
+        }
+        // holds the message to be updated, null if does not exist
+        return targetMessage;
     }
 
     public List<Message> getAllMessagesByAccountId(int accountId) {
-        return messageRepository.findAllByPostedBy(accountId);
+        return (List<Message>) messageRepository.findAllByPostedBy(accountId);
     }
 
 }
